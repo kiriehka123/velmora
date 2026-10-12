@@ -196,6 +196,34 @@ a{color:inherit;text-decoration:none}
   *{animation:none!important;transition:none!important}
   .leaves{display:none}
 }
+
+/* Вики датапаков */
+.wiki{margin-top:34px;scroll-margin-top:110px}
+.wiki-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.wiki h2{font-family:"Unbounded",sans-serif;font-size:clamp(23px,3vw,34px);margin-bottom:8px}
+.wiki-intro{color:var(--muted);max-width:70ch}
+.wiki-tools{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.wiki-search{flex:1;min-width:220px;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;padding:13px 16px;color:var(--text);font:600 15px "Manrope",sans-serif}
+.wiki-search::placeholder{color:var(--muted)}
+.wiki-cats{display:flex;gap:8px;flex-wrap:wrap}
+.wiki-cats button{background:var(--glass);color:var(--text);border:1px solid var(--glass-b);border-radius:999px;padding:10px 14px;cursor:pointer;font:600 13px "Manrope",sans-serif}
+.wiki-cats button.active{border-color:var(--accent);background:rgba(255,138,61,.15);color:var(--accent)}
+.wiki-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px}
+.wiki-card{background:var(--glass);border:1px solid var(--glass-b);border-radius:18px;padding:20px;backdrop-filter:blur(14px);transition:transform .2s,border-color .2s}
+.wiki-card:hover{transform:translateY(-3px);border-color:rgba(255,138,61,.5)}
+.wiki-card-top{display:flex;gap:13px;align-items:center;margin-bottom:12px}
+.wiki-icon{width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center;border-radius:14px;background:rgba(0,0,0,.22);font-size:26px}
+.wiki-card h3{font-size:17px;font-weight:800;overflow-wrap:anywhere}
+.wiki-tag{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.wiki-card p{color:var(--muted);font-size:14px}
+.wiki-card details{margin-top:14px;border-top:1px solid var(--glass-b);padding-top:12px}
+.wiki-card summary{cursor:pointer;color:var(--text);font-weight:800;font-size:14px}
+.wiki-details{padding-top:12px;color:var(--muted);font-size:14px;white-space:pre-line}
+.wiki-link{display:inline-block;margin-top:12px;color:var(--accent);font-weight:800;font-size:13px}
+.wiki-count{color:var(--muted);font-size:13px;margin:12px 0}
+.wiki-empty{display:none;color:var(--muted);padding:24px;border:1px dashed var(--glass-b);border-radius:16px}
+@media(max-width:600px){.wiki-card{padding:16px}.wiki-tools{display:block}.wiki-cats{margin-top:10px}}
+
 </style>
 </head>
 <body>
@@ -204,13 +232,14 @@ a{color:inherit;text-decoration:none}
   <a class="logo" href="#home">VELMORA</a>
   <nav>
     <a href="#home">Главная</a>
+    <a href="#wiki">Вики</a>
     <a href="#shop">Магазин</a>
   </nav>
   <div class="socials">
     <a href="https://t.me/velmorar" target="_blank" rel="noopener" title="Telegram">TG</a>
     <a href="https://discord.gg/GBSnHHnCtM" target="_blank" rel="noopener" title="Discord">DS</a>
   </div>
-  <a class="btn ghost" href="#shop">Перейти к товарам</a>
+  <a class="btn ghost" href="#wiki">Вики датапаков</a>
 </header>
 
 <main>
@@ -229,6 +258,34 @@ a{color:inherit;text-decoration:none}
   <section class="autumn">
     <h2>Мы уже на версии 26.3</h2>
     <p>Мы одни из первых перешли на новую версию <strong>26.3</strong>. Заходите к нам и прочувствуйте всю атмосферу осени: красные кроны, рыжие поляны и тёплый свет на закате.</p>
+  </section>
+
+
+
+  <section class="wiki" id="wiki">
+    <div class="wiki-head">
+      <div>
+        <h2>Вики датапаков</h2>
+        <p class="wiki-intro">Справочник изменений ванильного мира Velmora. Найди нужный датапак и открой инструкцию, чтобы узнать, как пользоваться его возможностями.</p>
+      </div>
+    </div>
+    <div class="wiki-tools">
+      <input class="wiki-search" id="wikiSearch" type="search" placeholder="Поиск по названию или описанию…" aria-label="Поиск по вики">
+      <div class="wiki-cats" id="wikiCats" aria-label="Категории датапаков">
+        <button class="active" type="button" data-wcat="all">Все</button>
+        <button type="button" data-wcat="Удобство">Удобство</button>
+        <button type="button" data-wcat="Декор">Декор</button>
+        <button type="button" data-wcat="Животные">Животные</button>
+        <button type="button" data-wcat="Строительство">Строительство</button>
+        <button type="button" data-wcat="Косметика">Косметика</button>
+        <button type="button" data-wcat="Предметы">Предметы</button>
+        <button type="button" data-wcat="Фермы">Фермы</button>
+        <button type="button" data-wcat="Опасности">Опасности</button>
+      </div>
+    </div>
+    <p class="wiki-count" id="wikiCount" aria-live="polite"></p>
+    <div class="wiki-grid" id="wikiGrid"></div>
+    <p class="wiki-empty" id="wikiEmpty">Ничего не найдено. Попробуй изменить запрос или категорию.</p>
   </section>
 
   <section class="filters">
@@ -291,6 +348,53 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <script>
+
+/* ===== ВИКИ ДАТАПАКОВ ===== */
+const WIKI = [["Compass Coordinates", "Удобство", "🧭", "Показывает координаты и направление взгляда, когда держите компас; часы показывают игровой день и время.", "Возьмите компас или часы в основную или вторую руку. Информация появится над хотбаром. Уберите предмет из рук — надпись исчезнет. Команды и настройка не нужны.", ""], ["Call Your Nautilus", "Животные", "🐚", "Позволяет подозвать прирученного наутилуса козьим рогом, даже если он находится в незагруженных чанках.", "Приручите наутилуса и назовите его биркой (без спецсимволов вроде # и '). Возьмите козий рог, присядьте (Shift) и смотрите на наутилуса 4 секунды. Рог получит его имя и станет выглядеть зачарованным. Используйте рог, чтобы призвать наутилуса. Только владелец может получить и использовать привязанный рог. Чтобы сбросить привязку, присядьте и смотрите строго вверх. Работает с обычным и зомби-наутилусом.", ""], ["Call Your Parrot", "Животные", "🦜", "Позволяет подозвать приручённого попугая козьим рогом, даже из незагруженных чанков.", "Приручите попугая и назовите его биркой (без спецсимволов вроде # и '). Возьмите козий рог, присядьте (Shift) и смотрите на попугая 4 секунды. Рог получит имя попугая. Используйте его, чтобы призвать питомца. Только владелец может получить и использовать рог. Если попугай был очень далеко и стал невидимым после телепортации, перезайдите в игру.", ""], ["Forgetful Sniffer", "Фермы", "🌱", "Нюхачи забывают места, где уже копали, и могут повторно выкапывать семена из одного блока.", "Ничего настраивать не нужно. Датапак позволяет создавать фермы цветов и семян на основе нюхачей.", ""], ["Killer Bunny Name Tag", "Животные", "🐇", "Превращает кролика в агрессивного кролика-убийцу, если назвать его The Killer Bunny.", "Переименуйте бирку в наковальне точно в The Killer Bunny и используйте её на кролике. Чтобы вернуть обычное состояние, переименуйте кролика другой биркой.", ""], ["Decorations Plus", "Декор", "🪴", "Добавляет более 60 декоративных предметов, которые создаются на обычном верстаке. Ресурспаки и моды не нужны.", "Откройте каталог декораций, найдите нужный предмет и посмотрите рецепт. После крафта разместите предмет в мире, надев его на стойку для брони.", "https://yoavtc.github.io/deco-plus/"], ["Display Cases", "Декор", "🪟", "Добавляет витрины для красивого отображения предметов в мире. Поддерживается редстоун.", "Крафт: стекло в центре, палки сверху, снизу, слева и справа. ПКМ без Shift — положить предмет в витрину или забрать уже лежащий. ЛКМ — сломать витрину. Shift + ПКМ пустой рукой переключает режим отображения; с красителем меняет цвет стекла; с ведром воды возвращает прозрачное стекло; с другим блоком меняет основание. Витрина с предметом выдаёт сигнал редстоуна, пустая — нет.", ""], ["Blossoming Pots", "Декор", "🌼", "Расширяет список растений для горшков. Декорированные горшки работают как большие цветочные горшки.", "Возьмите поддерживаемое растение и нажмите ПКМ по декорированному или пустому цветочному горшку. Чтобы достать растение из обычного горшка, нажмите по нему пустой рукой. Чтобы освободить декорированный горшок, сломайте его. У растений в декорированных горшках часто есть несколько стадий роста.", ""], ["Bookshelf Inspector", "Удобство", "📚", "Позволяет узнать, какие книги лежат в резной книжной полке, не доставая их.", "Остановитесь и посмотрите на книгу в резной книжной полке — появится её название. Для зачарованных книг показываются зачарования, для написанных — автор. Работает на любом языке и поддерживает форматирование названия.", ""], ["Lively Lily Pads", "Декор", "🪷", "Позволяет размещать декорации на кувшинках.", "На кувшинки можно ставить зажжённые свечи, фонари, факелы, коралловые веера, цветы кактуса и споровые цветы (азалии). Возьмите предмет и поставьте его на кувшинку как на обычный блок.", ""], ["Rope Ladders", "Строительство", "🪜", "Позволяет удлинять лестницы вниз, даже если они висят в воздухе без опоры.", "Возьмите лестницу и используйте её на нижнем конце столба из лестниц. Висящая лестница при разрушении ломает лестницы под ней. Если сломать верхнюю лестницу, весь столб подтянется вверх, и предметы будет удобно собрать.", ""], ["Shapeless Portals", "Строительство", "🟪", "Позволяет строить порталы в Незер любой формы, а не только прямоугольной.", "Постройте рамку любой формы из обсидиана и зажгите её огнивом или огненным зарядом.", ""], ["Custom Elytra DP", "Косметика", "🪽", "Позволяет менять текстуру элитр на текстуру плаща с помощью переименования в наковальне. Сам плащ и OptiFine не нужны.", "Нужны и датапак, и ресурспак: датапак поместите в папку datapacks мира, ресурспак — в resourcepacks. Переименуйте элитры точно в одно из доступных названий и наденьте их. Доступные названия: Anniversary 15, Birthday, Cherry Blossom, Cobalt, Common, dB, Experience, Followers, Founders, Home, Jack Black Blue, Jack Black Gray, Jack Black Red, MCC 15, Menace, Migration, Millonth Customer, Minecon 2011, Minecon 2012, Minecon 2013, Minecon 2015, Minecon 2016, Mojang, Mojang Classic, Mojang Office, Mojang Studios, Mojira, Oxeye, Pan, Prismarine, Purple Heart, Realms, Scrolls, Snowman, Spade, Test, Translator, Turtle, Valentine, Vanilla, Yearn, Blueprint, Builder, Copper, Crafter, Heroe, Moonlight Trail, Progress Pride, Twisted, Soul, Special, Zombie Horse. Чтобы вернуть обычный вид, удалите название в наковальне. Название Default показывает стандартную серую текстуру, даже если на игроке есть плащ.", "https://modrinth.com/datapack/custom-elytra-dp"], ["New Tools", "Предметы", "⚒️", "Добавляет 20 инструментов из четырёх материалов: смола, аметист, морские материалы (Sea Stuff) и скалк. Для каждого материала есть меч, кирка, лопата, мотыга и топор.", "Нужен ресурспак — его можно скачать в Telegram-канале или Discord сервера. У инструментов есть особые способности. Например, аметистовый меч: Shift + ПКМ — магический луч (Magic Ray), ПКМ — рывок (Dash), а при полном здоровье даёт +0.1 к скорости. Характеристики меча: 6 урона, скорость атаки 1.6, +0.1 к скорости. Нестандартные рецепты уже открыты в книге рецептов.", ""], ["Smelting Plus", "Удобство", "🔥", "Улучшает переплавку инструментов и брони: вместо самородков предмет возвращает один целый слиток соответствующего материала.", "Положите подходящий предмет в печь или плавильню и добавьте топливо. Поддерживаются железные и золотые инструменты, броня и броня для лошади; алмазные и незеритовые инструменты и броня; медные инструменты, броня, броня для лошади, двери, люки, решётки, лампы и громоотводы. Также работают некоторые другие предметы: ведро, воронка, ножницы, подзорная труба, рельсы, котлы и т. д. Для подзорной трубы указано исключение: 2 слитка меди дают 1 слиток обратно.", ""], ["Stonecutter Damage", "Опасности", "🪚", "Камнерез наносит 1 единицу урона (полсердца) существам, которые по нему ходят, включая мобов и игроков.", "Поставьте камнерез. Настройки и команды не нужны: любое существо, наступившее на него, начнёт получать урон.", ""]].map(([name,cat,icon,description,instructions,link]) => ({name,cat,icon,description,instructions,link}));
+const wikiGrid = document.getElementById("wikiGrid");
+const wikiSearch = document.getElementById("wikiSearch");
+const wikiCount = document.getElementById("wikiCount");
+const wikiEmpty = document.getElementById("wikiEmpty");
+let wikiCategory = "all";
+function renderWiki() {
+  const query = wikiSearch.value.trim().toLocaleLowerCase("ru");
+  const found = WIKI.filter(item => (wikiCategory === "all" || item.cat === wikiCategory) &&
+    (item.name + " " + item.cat + " " + item.description + " " + item.instructions).toLocaleLowerCase("ru").includes(query));
+  wikiGrid.replaceChildren();
+  found.forEach(item => {
+    const article = document.createElement("article");
+    article.className = "wiki-card";
+    const top = document.createElement("div"); top.className = "wiki-card-top";
+    const icon = document.createElement("div"); icon.className = "wiki-icon"; icon.textContent = item.icon;
+    const heading = document.createElement("div");
+    const tag = document.createElement("div"); tag.className = "wiki-tag"; tag.textContent = item.cat;
+    const title = document.createElement("h3"); title.textContent = item.name;
+    heading.append(tag,title); top.append(icon,heading);
+    const desc = document.createElement("p"); desc.textContent = item.description;
+    const details = document.createElement("details");
+    const summary = document.createElement("summary"); summary.textContent = "Как пользоваться";
+    const body = document.createElement("div"); body.className = "wiki-details"; body.textContent = item.instructions;
+    details.append(summary,body);
+    article.append(top,desc,details);
+    if (item.link) {
+      const link = document.createElement("a"); link.className = "wiki-link"; link.href = item.link;
+      link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "Открыть страницу датапака ↗";
+      article.append(link);
+    }
+    wikiGrid.append(article);
+  });
+  wikiCount.textContent = "Найдено датапаков: " + found.length + " из " + WIKI.length;
+  wikiEmpty.style.display = found.length ? "none" : "block";
+}
+wikiSearch.addEventListener("input", renderWiki);
+document.getElementById("wikiCats").addEventListener("click", event => {
+  const button = event.target.closest("button[data-wcat]"); if (!button) return;
+  document.querySelectorAll("#wikiCats button").forEach(el => el.classList.toggle("active", el === button));
+  wikiCategory = button.dataset.wcat; renderWiki();
+});
+renderWiki();
+
+
 /* ===== ТОВАРЫ: меняй названия, цены и категории здесь ===== */
 /* cat: rank = Привилегии, other = Другое.  free: true = сумму выбирает покупатель */
 const PRODUCTS = [
