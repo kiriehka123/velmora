@@ -104,6 +104,8 @@ a{color:inherit;text-decoration:none}
 .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
 .price{color:var(--accent);font-weight:800;font-size:20px}
 .price small{color:var(--muted);font-weight:600;font-size:13px}
+.uah-inline{color:var(--muted);font-weight:600;font-size:14px}
+.uah{display:block;font-style:normal;color:var(--muted);font-weight:600;font-size:13px;margin-top:2px}
 .add{width:44px;height:44px;border-radius:12px;border:0;cursor:pointer;background:var(--accent);color:#1a0d02;font-size:26px;font-weight:800;line-height:1}
 .add:hover{filter:brightness(1.1)}
 .free{display:grid;gap:6px;color:var(--muted);font-weight:600;font-size:13px}
@@ -205,10 +207,8 @@ a{color:inherit;text-decoration:none}
     <a href="#shop">Магазин</a>
   </nav>
   <div class="socials">
-    <!-- ЗАМЕНИ # на свои ссылки -->
-    <a href="#" title="Telegram">TG</a>
-    <a href="#" title="Discord">DS</a>
-    <a href="#" title="TikTok">TT</a>
+    <a href="https://t.me/velmorar" target="_blank" rel="noopener" title="Telegram">TG</a>
+    <a href="https://discord.gg/GBSnHHnCtM" target="_blank" rel="noopener" title="Discord">DS</a>
   </div>
   <a class="btn ghost" href="#shop">Перейти к товарам</a>
 </header>
@@ -255,9 +255,8 @@ a{color:inherit;text-decoration:none}
     <p>Velmora — лучшее ванильное выживание без доната и привата</p>
   </div>
   <div class="socials">
-    <a href="#" title="Telegram">TG</a>
-    <a href="#" title="Discord">DS</a>
-    <a href="#" title="TikTok">TT</a>
+    <a href="https://t.me/velmorar" target="_blank" rel="noopener" title="Telegram">TG</a>
+    <a href="https://discord.gg/GBSnHHnCtM" target="_blank" rel="noopener" title="Discord">DS</a>
   </div>
 </footer>
 
@@ -269,7 +268,7 @@ a{color:inherit;text-decoration:none}
     <div id="stepCart">
       <h2>Корзина</h2>
       <ul id="cartList"></ul>
-      <p class="total">Итого: <span id="cartTotal">0</span> ₽</p>
+      <p class="total">Итого: <span id="cartTotal">0</span> ₽ <span class="uah-inline" id="cartTotalUah"></span></p>
       <div class="modal-actions">
         <button class="btn ghost" id="closeModal" type="button">Закрыть</button>
         <button class="btn" id="checkout" type="button">Оплатить</button>
@@ -280,7 +279,8 @@ a{color:inherit;text-decoration:none}
       <h2>Как оплатить</h2>
       <p class="notice">При переходе на DonationAlerts вам необходимо указать ту сумму, которая написана в корзине. Если ввести и отправить неверную сумму, товар не выдастся. Обратите внимание, что комиссию оплачиваете вы.</p>
       <p class="notice nick-warn">В тексте доната (поле «Сообщение») обязательно напишите свой ник в Minecraft. Без ника мы не сможем выдать товар.</p>
-      <p class="pay-sum">Сумма к оплате: <strong id="paySum">0</strong> ₽</p>
+      <p class="pay-sum">Сумма к оплате: <strong id="paySum">0</strong> ₽ <span class="uah-inline" id="paySumUah"></span></p>
+      <p class="notice">Оплата принимается в рублях. Сумма в гривнах (₴) указана приблизительно, по курсу НБУ, и нужна только для удобства.</p>
       <div class="modal-actions">
         <button class="btn ghost" id="backToCart" type="button">Назад</button>
         <button class="btn" id="goPay" type="button">Перейти на DonationAlerts</button>
@@ -297,9 +297,15 @@ const PRODUCTS = [
   { id: 1, name: "Plus 1 месяц",   price: 249, cat: "rank",  icon: "🟡" },
   { id: 2, name: "Пожертвование",  price: 10,  cat: "other", icon: "💵", free: true, min: 10 },
   { id: 3, name: "Разбан",         price: 599, cat: "other", icon: "🚫" },
-  { id: 4, name: "Проходка",       price: 99,  cat: "other", icon: "📄" }
+  { id: 4, name: "Проходка",       price: 99,  cat: "other", icon: "📄" },
+  { id: 5, name: "Оплата хостинга", price: 2000, cat: "other", icon: "🖥️" }
 ];
 const DONATE_URL = "https://www.donationalerts.com/r/velmorar";
+
+/* Курс для гривен (₴): сколько гривен за 1 рубль (курс НБУ ≈ 0.49). Меняй при необходимости */
+const RUB_TO_UAH = 0.49;
+const uah = rub => Math.round(rub * RUB_TO_UAH);
+const uahText = rub => "≈ " + uah(rub) + " ₴";
 
 const grid = document.getElementById("grid");
 const cartCount = document.getElementById("cartCount");
@@ -315,10 +321,14 @@ function render() {
     card.className = "card reveal";
     card.style.setProperty("--d", (idx * 0.09) + "s");
     const priceBlock = p.free
-      ? '<label class="free">Своя сумма, ₽<input type="number" class="free-input" min="' + p.min + '" step="1" value="' + p.price + '"></label><div class="row"><span class="price">от ' + p.min + '₽</span>'
-      : '<div class="row"><span class="price">' + p.price + '₽ <small>/ 1 шт.</small></span>';
+      ? '<label class="free">Своя сумма, ₽<input type="number" class="free-input" min="' + p.min + '" step="1" value="' + p.price + '"><span class="uah-live">' + uahText(p.price) + '</span></label><div class="row"><span class="price">от ' + p.min + '₽<em class="uah">' + uahText(p.min) + '</em></span>'
+      : '<div class="row"><span class="price">' + p.price + '₽ <small>/ 1 шт.</small><em class="uah">' + uahText(p.price) + '</em></span>';
     card.innerHTML = '<div class="icon">' + p.icon + '</div><h3>' + p.name + '</h3>' + priceBlock +
       '<button class="add" type="button" aria-label="В корзину">+</button></div>';
+    if (p.free) {
+      const inp = card.querySelector(".free-input"), live = card.querySelector(".uah-live");
+      inp.oninput = () => live.textContent = uahText(Number(inp.value) || 0);
+    }
     card.querySelector(".add").onclick = () => {
       let price = p.price;
       if (p.free) {
@@ -342,11 +352,12 @@ function updateCart() {
   list.innerHTML = cart.length ? "" : "<li>Корзина пуста</li>";
   cart.forEach((p, i) => {
     const li = document.createElement("li");
-    li.innerHTML = '<span>' + p.name + '</span><span>' + p.price + ' ₽ <button type="button" class="rm" aria-label="Убрать">✕</button></span>';
+    li.innerHTML = '<span>' + p.name + '</span><span>' + p.price + ' ₽ <small style="color:var(--muted)">(' + uahText(p.price) + ')</small> <button type="button" class="rm" aria-label="Убрать">✕</button></span>';
     li.querySelector(".rm").onclick = () => { cart.splice(i, 1); updateCart(); };
     list.appendChild(li);
   });
   document.getElementById("cartTotal").textContent = total();
+  document.getElementById("cartTotalUah").textContent = "(" + uahText(total()) + ")";
 }
 
 document.getElementById("cats").onclick = e => {
@@ -363,6 +374,7 @@ modal.onclick = e => { if (e.target === modal) modal.hidden = true; };
 document.getElementById("checkout").onclick = () => {
   if (!cart.length) return alert("Корзина пуста");
   document.getElementById("paySum").textContent = total();
+  document.getElementById("paySumUah").textContent = "(" + uahText(total()) + ")";
   stepCart.hidden = true; stepPay.hidden = false;
 };
 document.getElementById("backToCart").onclick = openModal;
